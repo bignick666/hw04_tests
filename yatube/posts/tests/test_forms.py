@@ -18,7 +18,6 @@ class TaskCreateFormTests(TestCase):
             author=cls.user,
             text='Тестовый постик',
         )
-        # Создаем форму, если нужна проверка атрибутов
 
     def test_post_create(self):
         posts_count = Post.objects.count()
@@ -26,13 +25,16 @@ class TaskCreateFormTests(TestCase):
             'text': 'Тестовая запись новая',
             'author': self.post.author,
         }
-        response = self.authorized_client.post(reverse('posts:create'),
-                                               data=form_data,
-                                               follow=True,
-                                               )
+        response = self.authorized_client.post(
+            reverse('posts:create'),
+            data=form_data,
+            follow=True,
+        )
         self.assertEqual(Post.objects.count(), posts_count + 1)
-        self.assertRedirects(response, reverse('posts:profile',
-                                               kwargs={'username': self.user.username}))
+        self.assertRedirects(
+            response,
+            reverse('posts:profile',
+                    kwargs={'username': self.user.username}))
 
     def test_post_edit(self):
         group = Group.objects.create(
@@ -45,7 +47,8 @@ class TaskCreateFormTests(TestCase):
             text='testovii post',
             group=group
         )
-        url = reverse('posts:post_edit', kwargs={"post_id": post.id})
+        url = reverse('posts:post_edit',
+                      kwargs={"post_id": post.id})
         self.response = self.authorized_client.post(url, {
             "text": "Обновленный пост",
             "group": group.id,
@@ -53,4 +56,3 @@ class TaskCreateFormTests(TestCase):
         post.refresh_from_db()
         self.assertEqual(post.text, "Обновленный пост")
         self.assertEqual(post.group.id, group.id)
-
