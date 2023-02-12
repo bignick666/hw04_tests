@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ post.text|slice:"30" }}{% endblock %}
+    {% include 'includes/header.html' %}
+    <main>
+      {% block content %}
+      <div class="row">
+        <aside class="col-12 col-md-3">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              Дата публикации: {{ post.pub_date|date:"d E Y" }}
+            </li>
+            <!-- если у поста есть группа -->
+            <li class="list-group-item">
+              {% if post.group %}
+              Группа: {{ post.group }}
+        <a href="{% url 'app_posts:groups' post.group.slug %}">все записи группы</a>
+          {% elif post.group is None %}
+            Группа: Данный пост не принадлежит к группе
+          {% endif %}
+            </li>
+            <li class="list-group-item">
+              Автор: {{ post.author }}
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Всего постов автора: {{ author_posts_count.count }}
+            </li>
+            <li class="list-group-item">
+              <a href="{%url 'app_posts:profile' post.author.username %}">
+                все посты пользователя
+              </a>
+            </li>
+          </ul>
+        </aside>
+        <article class="col-12 col-md-9">
+          <p>
+            {{post.text}}
+          </p>
+        </article>
+      </div>
+      {% endblock %}
+    </main>
+  {%include 'includes/footer.html'%}
