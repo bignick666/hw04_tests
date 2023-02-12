@@ -46,7 +46,7 @@ class StaticURLTests(TestCase):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
-    def test_create_page_show_correct_context(self):  # sozdanie posta context
+    def test_create_page_show_correct_context(self):
         response = self.authorized_client.get(reverse('posts:create'))
         form_fields = {
             'text': forms.fields.CharField,
@@ -58,7 +58,7 @@ class StaticURLTests(TestCase):
                 form_field = response.context['form'].fields[value]
                 self.assertIsInstance(form_field, expected)
 
-    def test_post_detail_page_show_correct_context(self):  # post_detail context
+    def test_post_detail_page_show_correct_context(self):
         response = self.guest_client.get(
             reverse('posts:post_detail', kwargs={'post_id': 1})
         )
@@ -66,7 +66,8 @@ class StaticURLTests(TestCase):
                          self.post.author)
         self.assertEqual(response.context['post'].text,
                          'Тестовый постик')
-        self.assertEqual(response.context['author_posts_count'].count(), 1)
+        self.assertEqual(response.context['author_posts_count'].count(),
+                         1)
         self.assertEqual(response.context['post'].pub_date,
                          self.post.pub_date)
         self.assertEqual(response.context['post'].group,
