@@ -1,0 +1,7 @@
+POSTS_PROFILE = 'posts:profile'
+POSTS_EDIT = 'posts:post_edit'
+POSTS_CREATE = 'posts:create'
+POSTS_INDEX = 'posts:index'
+POSTS_GROUPS = 'posts:groups'
+POSTS_DETAIL = 'posts:post_detail'
+UNEXPECTED_PAGE = '/unexpected_page/'

@@ -1,9 +1,6 @@
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from ..models import Group, Post
-
-User = get_user_model()
+from posts.models import Post, Group, User
 
 
 class PostModelTest(TestCase):
@@ -18,20 +15,23 @@ class PostModelTest(TestCase):
         )
         cls.post = Post.objects.create(
             author=cls.user,
-            text='Тестовый пост',
+            text='Тестовый постТестовый постТестовый пост',
         )
 
     def test_models_post_have_correct_object_name(self):
+        """Тестируем, что у поста корректное имя"""
         post = PostModelTest.post
         expected_name = post.text[:15]
         self.assertEqual(expected_name, str(post))
 
     def test_models_group_have_correct_object_name(self):
+        """Тестируем, что у поста корректная группа"""
         group = PostModelTest.group
         expected_name = group.title
         self.assertEqual(expected_name, str(group))
 
     def test_models_group_verbose_names(self):
+        """Тестируем корректность verbose_name группы"""
         group = PostModelTest.group
         field_verboses = {
             'title': 'Название',
@@ -45,6 +45,7 @@ class PostModelTest(TestCase):
                     expected)
 
     def test_models_post_verbose_names(self):
+        """Тестируем корректность verbose_name поста"""
         post = PostModelTest.post
         field_verboses = {
             'text': 'Тело поста',

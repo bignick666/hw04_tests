@@ -1,9 +1,10 @@
-from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
+from django.urls import reverse
 
-from ..models import Group, Post
-
-User = get_user_model()
+from ..models import Group, Post, User
+from posts.tests.constants import POSTS_PROFILE,\
+    POSTS_EDIT, POSTS_CREATE, POSTS_INDEX,\
+    POSTS_GROUPS, POSTS_DETAIL, UNEXPECTED_PAGE
 
 
 class StaticURLTests(TestCase):
@@ -26,40 +27,54 @@ class StaticURLTests(TestCase):
     def test_homepage(self):
         # Отправляем запрос через client,
         # созданный в setUp()
-        response = self.guest_client.get('/')
+        response = self.guest_client.get(reverse(POSTS_INDEX))
         self.assertEqual(response.status_code, 200)
 
     def test_grouppage(self):
-        response = self.guest_client.get('/group/test-slug/')
+        response = self.guest_client.get(
+            reverse(POSTS_GROUPS, kwargs={'slug': 'test-slug'})
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_profile(self):
-        response = self.guest_client.get('/profile/Geek/')
+        response = self.guest_client.get(
+            reverse(POSTS_PROFILE, kwargs={'username': 'Geek'})
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_posts(self):
-        response = self.guest_client.get('/posts/1/')
+        response = self.guest_client.get(
+            reverse(POSTS_DETAIL, kwargs={'post_id': self.post.id})
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_posts_edit(self):
-        response = self.authorized_client.get('/posts/1/edit/')
+        response = self.authorized_client.get(
+            reverse(POSTS_EDIT, kwargs={'post_id': self.post.id})
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_createpage(self):
-        response = self.authorized_client.get('/create/')
+        response = self.authorized_client.get(reverse(POSTS_CREATE))
         self.assertEqual(response.status_code, 200)
 
     def test_unexpectedpage(self):
-        response = self.guest_client.get('/unexpected_page/')
+        response = self.guest_client.get(UNEXPECTED_PAGE)
         self.assertEqual(response.status_code, 404)
 
     def test_urls_uses_correct_template(self):
         templates_url_names = {
-            '/': 'posts/index.html',
-            '/group/test-slug/': 'posts/group_list.html',
-            '/profile/Geek/': 'posts/profile.html',
-            '/posts/1/': 'posts/post_detail.html',
-            '/create/': 'posts/create.html'
+            reverse(POSTS_INDEX): 'posts/index.html',
+            reverse(POSTS_GROUPS,
+                    kwargs={'slug': 'test-slug'}
+                    ): 'posts/group_list.html',
+            reverse(POSTS_PROFILE,
+                    kwargs={'username': 'Geek'}
+                    ): 'posts/profile.html',
+            reverse(POSTS_DETAIL,
+                    kwargs={'post_id': self.post.id}
+                    ): 'posts/post_detail.html',
+            reverse(POSTS_CREATE): 'posts/create.html'
 
         }
         for url, template in templates_url_names.items():
