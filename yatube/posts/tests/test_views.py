@@ -186,4 +186,5 @@ class PaginatorViewsTest(TestCase):
     def test_second_page_contains_three_records(self):
         response = self.authorized_client.get(
             reverse(INDEX_URL) + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), TEST_POSTS_SECOND_PAGE)
+        self.assertEqual(len(response.context['page_obj']),
+                         TEST_POSTS_SECOND_PAGE)
