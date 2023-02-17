@@ -2,60 +2,62 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from ..models import Group, Post, User
-from posts.tests.constants import POSTS_PROFILE,\
-    POSTS_EDIT, POSTS_CREATE, POSTS_INDEX,\
-    POSTS_GROUPS, POSTS_DETAIL, UNEXPECTED_PAGE
+from posts.tests.constants import PROFILE_URL,\
+    INDEX_URL, CREATE_URL,\
+    GROUPS_URL, DETAIL_URL, EDIT_URL, UNEXPECTED_PAGE,\
+    PROFILE_TEMPLATE, INDEX_TEMPLATE,\
+    CREATE_TEMPLATE, GROUPS_TEMPLATE, DETAIL_TEMPLATE
 
 
 class StaticURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.authorized_client = Client()
-        cls.guest_client = Client()
         cls.user = User.objects.create_user(username='Geek')
-        cls.authorized_client.force_login(cls.user)
-        cls.post = Post.objects.create(
-            author=cls.user,
+
+    def setUp(self):
+        self.authorized_client = Client()
+        self.guest_client = Client()
+        self.authorized_client.force_login(self.user)
+        self.post = Post.objects.create(
+            author=self.user,
             text='Тестовый постик'
         )
-        cls.group = Group.objects.create(
+        self.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
         )
 
     def test_homepage(self):
-        # Отправляем запрос через client,
-        # созданный в setUp()
-        response = self.guest_client.get(reverse(POSTS_INDEX))
+        response = self.guest_client.get(reverse(INDEX_URL))
         self.assertEqual(response.status_code, 200)
 
     def test_grouppage(self):
         response = self.guest_client.get(
-            reverse(POSTS_GROUPS, kwargs={'slug': 'test-slug'})
+            reverse(GROUPS_URL, kwargs={'slug': 'test-slug'})
         )
         self.assertEqual(response.status_code, 200)
 
     def test_profile(self):
         response = self.guest_client.get(
-            reverse(POSTS_PROFILE, kwargs={'username': 'Geek'})
+            reverse(PROFILE_URL, kwargs={'username': 'Geek'})
         )
         self.assertEqual(response.status_code, 200)
 
     def test_posts(self):
         response = self.guest_client.get(
-            reverse(POSTS_DETAIL, kwargs={'post_id': self.post.id})
+            reverse(DETAIL_URL, kwargs={'post_id': self.post.id})
         )
         self.assertEqual(response.status_code, 200)
 
     def test_posts_edit(self):
         response = self.authorized_client.get(
-            reverse(POSTS_EDIT, kwargs={'post_id': self.post.id})
+            reverse(EDIT_URL, kwargs={'post_id': self.post.id})
         )
         self.assertEqual(response.status_code, 200)
 
     def test_createpage(self):
-        response = self.authorized_client.get(reverse(POSTS_CREATE))
+        response = self.authorized_client.get(reverse(CREATE_URL))
         self.assertEqual(response.status_code, 200)
 
     def test_unexpectedpage(self):
@@ -64,17 +66,17 @@ class StaticURLTests(TestCase):
 
     def test_urls_uses_correct_template(self):
         templates_url_names = {
-            reverse(POSTS_INDEX): 'posts/index.html',
-            reverse(POSTS_GROUPS,
+            reverse(INDEX_URL): INDEX_TEMPLATE,
+            reverse(GROUPS_URL,
                     kwargs={'slug': 'test-slug'}
-                    ): 'posts/group_list.html',
-            reverse(POSTS_PROFILE,
+                    ): GROUPS_TEMPLATE,
+            reverse(PROFILE_URL,
                     kwargs={'username': 'Geek'}
-                    ): 'posts/profile.html',
-            reverse(POSTS_DETAIL,
+                    ): PROFILE_TEMPLATE,
+            reverse(DETAIL_URL,
                     kwargs={'post_id': self.post.id}
-                    ): 'posts/post_detail.html',
-            reverse(POSTS_CREATE): 'posts/create.html'
+                    ): DETAIL_TEMPLATE,
+            reverse(CREATE_URL): CREATE_TEMPLATE
 
         }
         for url, template in templates_url_names.items():

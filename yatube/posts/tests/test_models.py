@@ -19,13 +19,13 @@ class PostModelTest(TestCase):
         )
 
     def test_models_post_have_correct_object_name(self):
-        """Тестируем, что у поста корректное имя"""
+        """Тестируем, что у поста корректный __str__"""
         post = PostModelTest.post
         expected_name = post.text[:15]
         self.assertEqual(expected_name, str(post))
 
     def test_models_group_have_correct_object_name(self):
-        """Тестируем, что у поста корректная группа"""
+        """Тестируем, что у группы корректный __str__"""
         group = PostModelTest.group
         expected_name = group.title
         self.assertEqual(expected_name, str(group))

@@ -4,9 +4,11 @@ from django import forms
 
 from posts.models import Post, Group, User
 from posts.utils import POSTS_PER_PAGE
-from posts.tests.constants import POSTS_PROFILE,\
-    POSTS_EDIT, POSTS_CREATE, POSTS_INDEX,\
-    POSTS_GROUPS, POSTS_DETAIL
+from posts.tests.constants import PROFILE_URL,\
+    INDEX_URL, CREATE_URL,\
+    GROUPS_URL, DETAIL_URL, EDIT_URL,\
+    PROFILE_TEMPLATE, INDEX_TEMPLATE,\
+    CREATE_TEMPLATE, GROUPS_TEMPLATE, DETAIL_TEMPLATE
 
 from posts.forms import PostForm
 
@@ -18,31 +20,33 @@ class StaticURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.authorized_client = Client()
-        cls.guest_client = Client()
         cls.user = User.objects.create_user(username='Geek')
-        cls.authorized_client.force_login(cls.user)
-        cls.post = Post.objects.create(
-            author=cls.user,
+
+    def setUp(self):
+        self.authorized_client = Client()
+        self.guest_client = Client()
+        self.authorized_client.force_login(self.user)
+        self.post = Post.objects.create(
+            author=self.user,
             text='Тестовый постик'
         )
-        cls.group = Group.objects.create(
+        self.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
         )
 
     def test_urls_uses_correct_template(self):
         templates_page_names = {
-            reverse(POSTS_INDEX): 'posts/index.html',
-            reverse(POSTS_CREATE): 'posts/create.html',
-            reverse(POSTS_GROUPS,
-                    kwargs={'slug': 'test-slug'}): 'posts/group_list.html',
-            reverse(POSTS_PROFILE,
-                    kwargs={'username': 'Geek'}): 'posts/profile.html',
-            reverse(POSTS_DETAIL,
-                    kwargs={'post_id': 1}): 'posts/post_detail.html',
-            reverse(POSTS_EDIT,
-                    kwargs={'post_id': 1}): 'posts/create.html'
+            reverse(INDEX_URL): INDEX_TEMPLATE,
+            reverse(CREATE_URL): CREATE_TEMPLATE,
+            reverse(GROUPS_URL,
+                    kwargs={'slug': 'test-slug'}): GROUPS_TEMPLATE,
+            reverse(PROFILE_URL,
+                    kwargs={'username': 'Geek'}): PROFILE_TEMPLATE,
+            reverse(DETAIL_URL,
+                    kwargs={'post_id': 1}): DETAIL_TEMPLATE,
+            reverse(EDIT_URL,
+                    kwargs={'post_id': 1}): CREATE_TEMPLATE
         }
         for reverse_name, template in templates_page_names.items():
             with self.subTest(template=template):
@@ -50,7 +54,7 @@ class StaticURLTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_create_page_show_correct_context(self):
-        response = self.authorized_client.get(reverse('posts:create'))
+        response = self.authorized_client.get(reverse(CREATE_URL))
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField,
@@ -63,7 +67,7 @@ class StaticURLTests(TestCase):
 
     def test_post_detail_page_show_correct_context(self):
         response = self.guest_client.get(
-            reverse(POSTS_DETAIL, kwargs={'post_id': 1})
+            reverse(DETAIL_URL, kwargs={'post_id': 1})
         )
         self.assertEqual(response.context['post'].author,
                          self.post.author)
@@ -78,7 +82,7 @@ class StaticURLTests(TestCase):
 
     def test_post_edit_page_show_correct_context(self):
         response = self.authorized_client.get(
-            reverse(POSTS_EDIT, kwargs={"post_id": self.post.id})
+            reverse(EDIT_URL, kwargs={"post_id": self.post.id})
         )
         form_fields = {
             "text": forms.fields.CharField,
@@ -91,7 +95,7 @@ class StaticURLTests(TestCase):
 
     def test_profile_page_show_correct_context(self):
         response = self.authorized_client.get(
-            reverse(POSTS_PROFILE, kwargs={'username': 'Geek'}))
+            reverse(PROFILE_URL, kwargs={'username': 'Geek'}))
         test_profile_username = response.context['profile']
         self.assertEqual(test_profile_username, self.post.author)
 
@@ -102,7 +106,7 @@ class StaticURLTests(TestCase):
             group=self.group
         )
         response = self.guest_client.get(
-            reverse(POSTS_GROUPS, kwargs={'slug': 'test-slug'})
+            reverse(GROUPS_URL, kwargs={'slug': 'test-slug'})
         )
         test_group_title = response.context['group'].title
         test_group_description = response.context['group'].description
@@ -116,7 +120,7 @@ class StaticURLTests(TestCase):
 
     def test_index_page_show_correct_context(self):
         response = self.authorized_client.get(
-            reverse(POSTS_INDEX))
+            reverse(INDEX_URL))
         test_object_post = response.context["page_obj"][0]
         self.assertEqual(test_object_post.text, "Тестовый постик")
         self.assertEqual(test_object_post.author.username, "Geek")
@@ -130,21 +134,21 @@ class StaticURLTests(TestCase):
         )
 
         response_index = self.authorized_client.get(
-            reverse(POSTS_INDEX))
+            reverse(INDEX_URL))
         test_object_index = response_index.context["page_obj"][1]
         self.assertEqual(test_object_index.text, "Description text")
         self.assertEqual(test_object_index.author.username, "Geek")
         self.assertEqual(test_object_index.group, self.group)
 
         response_group_list = self.authorized_client.get(reverse(
-            POSTS_GROUPS,
+            GROUPS_URL,
             kwargs={'slug': 'test-slug'}))
         test_object_group = response_group_list.context["page_obj"][0]
         self.assertEqual(test_object_group.text, "Description text")
         self.assertEqual(test_object_group.author.username, "Geek")
 
         response_profile = self.authorized_client.get(reverse(
-            POSTS_PROFILE,
+            PROFILE_URL,
             kwargs={'username': 'Geek'}
         ))
         test_object_profile = response_profile.context['page_obj'][1]
@@ -176,10 +180,10 @@ class PaginatorViewsTest(TestCase):
 
     def test_first_page_contains_ten_records(self):
         response = self.authorized_client.get(
-            reverse(POSTS_INDEX))
-        self.assertEqual(len(response.context['page_obj']), 10)
+            reverse(INDEX_URL))
+        self.assertEqual(len(response.context['page_obj']), POSTS_PER_PAGE)
 
     def test_second_page_contains_three_records(self):
         response = self.authorized_client.get(
-            reverse(POSTS_INDEX) + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 3)
+            reverse(INDEX_URL) + '?page=2')
+        self.assertEqual(len(response.context['page_obj']), TEST_POSTS_SECOND_PAGE)

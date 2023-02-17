@@ -1,7 +1,15 @@
-POSTS_PROFILE = 'posts:profile'
-POSTS_EDIT = 'posts:post_edit'
-POSTS_CREATE = 'posts:create'
-POSTS_INDEX = 'posts:index'
-POSTS_GROUPS = 'posts:groups'
-POSTS_DETAIL = 'posts:post_detail'
+PROFILE_URL = 'posts:profile'
+EDIT_URL = 'posts:post_edit'
+CREATE_URL = 'posts:create'
+INDEX_URL = 'posts:index'
+GROUPS_URL = 'posts:groups'
+DETAIL_URL = 'posts:post_detail'
+
+PROFILE_TEMPLATE = 'posts/profile.html'
+CREATE_TEMPLATE = 'posts/create.html'
+INDEX_TEMPLATE = 'posts/index.html'
+GROUPS_TEMPLATE = 'posts/group_list.html'
+DETAIL_TEMPLATE = 'posts/post_detail.html'
+
+
 UNEXPECTED_PAGE = '/unexpected_page/'
