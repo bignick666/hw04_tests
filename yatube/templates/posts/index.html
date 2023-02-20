@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load thumbnail %}
   {% block content %}
     {% for post in page_obj %}
       <ul>
@@ -13,6 +14,9 @@
           Группа: <i>{{ post.group }}</i>
         </li>
       </ul>
+      {% thumbnail post.image "760x259" crop="center" upscale=True as im %}
+        <img class="card-img my-2" src="{{ im.url }}">
+      {% endthumbnail %}
       <p>{{ post.text|linebreaks }}</p>
       {% if post.group %}
         <a href="{% url 'app_posts:groups' post.group.slug %}">все записи группы</a>

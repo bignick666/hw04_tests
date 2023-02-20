@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load thumbnail %}
 {% block title %}{{ post.text|slice:"30" }}{% endblock %}
     {% include 'includes/header.html' %}
     <main>
@@ -18,9 +19,6 @@
             Группа: Данный пост не принадлежит к группе
           {% endif %}
             </li>
-            <li class="list-group-item">
-              Автор: {{ post.author }}
-            </li>
             <li class="list-group-item d-flex justify-content-between align-items-center">
               Всего постов автора: {{ author_posts_count.count }}
             </li>
@@ -32,6 +30,9 @@
           </ul>
         </aside>
         <article class="col-12 col-md-9">
+          {% thumbnail post.image "760x259" crop="center" upscale=True as im %}
+            <img class="card-img my-2" src="{{ im.url }}">
+          {% endthumbnail %}
           <p>
             {{post.text}}
           </p>

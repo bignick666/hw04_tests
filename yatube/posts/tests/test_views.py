@@ -28,7 +28,7 @@ class StaticURLTests(TestCase):
         self.authorized_client.force_login(self.user)
         self.post = Post.objects.create(
             author=self.user,
-            text='Тестовый постик'
+            text='Тестовый постик',
         )
         self.group = Group.objects.create(
             title='Тестовая группа',
@@ -73,6 +73,8 @@ class StaticURLTests(TestCase):
                          self.post.author)
         self.assertEqual(response.context['post'].text,
                          'Тестовый постик')
+        self.assertEqual(response.context['post'].image,
+                         self.post.image)
         self.assertEqual(response.context['author_posts_count'].count(),
                          1)
         self.assertEqual(response.context['post'].pub_date,
@@ -125,6 +127,7 @@ class StaticURLTests(TestCase):
         self.assertEqual(test_object_post.text, "Тестовый постик")
         self.assertEqual(test_object_post.author.username, "Geek")
         self.assertEqual(test_object_post.group, None)
+        self.assertEqual(test_object_post.image, None)
 
     def test_post_in_index(self):
         self.post2 = Post.objects.create(

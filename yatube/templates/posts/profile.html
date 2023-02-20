@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load thumbnail %}
 {% block title %}Все посты пользователя {{ profile.username }}{% endblock %}
   {% include 'includes/header.html' %}
     <main>
@@ -17,6 +18,9 @@
               Дата публикации: {{ post.pub_date|date:"d E Y" }}
             </li>
           </ul>
+          {% thumbnail post.image "760x259" crop="center" upscale=True as im %}
+            <img class="card-img my-2" src="{{ im.url }}">
+          {% endthumbnail %}
           <p>
           {{post.text}}
           </p>
