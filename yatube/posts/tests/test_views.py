@@ -2,7 +2,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
 
-from posts.models import Post, Group, User
+from posts.models import Post, Group, User, Comment
 from posts.utils import POSTS_PER_PAGE
 from posts.tests.constants import PROFILE_URL,\
     INDEX_URL, CREATE_URL,\
@@ -33,6 +33,11 @@ class StaticURLTests(TestCase):
         self.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
+        )
+        self.comment = Comment.objects.create(
+            post=self.post,
+            author=self.user,
+            text='Комментарий'
         )
 
     def test_urls_uses_correct_template(self):
@@ -66,7 +71,7 @@ class StaticURLTests(TestCase):
                 self.assertIsInstance(form_field, expected)
 
     def test_post_detail_page_show_correct_context(self):
-        response = self.guest_client.get(
+        response = self.authorized_client.get(
             reverse(DETAIL_URL, kwargs={'post_id': 1})
         )
         self.assertEqual(response.context['post'].author,

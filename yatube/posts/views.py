@@ -3,9 +3,9 @@ from django.shortcuts import render, get_object_or_404, \
 
 from django.contrib.auth.decorators import login_required
 
-from .models import Group, Post, User
+from .models import Group, Post, User, Comment
 
-from .forms import PostForm
+from .forms import PostForm, CommentForm
 from .utils import get_pag
 
 
@@ -36,10 +36,14 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    form = CommentForm(request.POST or None)
+    comment = Comment.objects.filter(post=post)
     author_posts_count = Post.objects.filter(author=post.author)
     return render(request, 'posts/post_detail.html', {
         'post': post,
         'author_posts_count': author_posts_count,
+        'form': form,
+        'comments': comment
     })
 
 
@@ -78,3 +82,15 @@ def post_edit(request, post_id):
                           {'form': form, 'is_edit': True})
     else:
         return redirect('posts:post_detail', post_id=post_id)
+
+
+@login_required
+def add_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    form = CommentForm(request.POST or None)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.author = request.user
+        comment.post = post
+        comment.save()
+    return redirect('posts:post_detail', post_id=post_id)
