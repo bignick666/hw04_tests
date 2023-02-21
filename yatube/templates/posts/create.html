@@ -10,7 +10,7 @@
                 {% if is_edit %}<h3>Редактировать запись</h3>{% else %}<h3>Новый пост</h3>{% endif %}
               </div>
               <div class="card-body">
-                <form method="post" class="post-form" enctype="multipart/form-data">
+                <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {% if form.errors %}
                   {% for field in form %}

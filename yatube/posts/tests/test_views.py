@@ -99,7 +99,9 @@ class StaticURLTests(TestCase):
         response = self.authorized_client.get(
             reverse(PROFILE_URL, kwargs={'username': 'Geek'}))
         test_profile_username = response.context['profile']
+        test_object_post = response.context["page_obj"][0]
         self.assertEqual(test_profile_username, self.post.author)
+        self.assertEqual(test_object_post.image, self.post.image)
 
     def test_group_list_page_show_correct_context(self):
         self.post = Post.objects.create(
@@ -115,6 +117,7 @@ class StaticURLTests(TestCase):
         test_object_post = response.context["page_obj"][0]
         self.assertEqual(test_object_post.text, "Тестовый постик1")
         self.assertEqual(test_object_post.author.username, "Geek")
+        self.assertEqual(test_object_post.image, self.post.image)
 
         self.assertEqual(test_group_title, self.group.title)
         self.assertEqual(test_group_description,
@@ -126,8 +129,8 @@ class StaticURLTests(TestCase):
         test_object_post = response.context["page_obj"][0]
         self.assertEqual(test_object_post.text, "Тестовый постик")
         self.assertEqual(test_object_post.author.username, "Geek")
-        self.assertEqual(test_object_post.group, None)
-        self.assertEqual(test_object_post.image, None)
+        self.assertEqual(test_object_post.group, self.post.group)
+        self.assertEqual(test_object_post.image, self.post.image)
 
     def test_post_in_index(self):
         self.post2 = Post.objects.create(

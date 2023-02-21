@@ -20,6 +20,7 @@ class PostCreateFormTests(TestCase):
         self.post = Post.objects.create(
             author=self.user,
             text='Тестовый постик',
+            image='posts/logo.png'
         )
         self.group = Group.objects.create(
             title='Group1',
@@ -34,6 +35,7 @@ class PostCreateFormTests(TestCase):
             'text': 'Тестовая запись новая',
             'author': self.post.author,
             'group': self.group.pk,
+            'image': self.post.image
         }
         response = self.authorized_client.post(
             reverse(CREATE_URL),
