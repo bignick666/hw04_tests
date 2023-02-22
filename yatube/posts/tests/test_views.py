@@ -166,6 +166,28 @@ class StaticURLTests(TestCase):
         self.assertEqual(test_object_profile.text, "Description text")
         self.assertEqual(test_object_profile.author.username, "Geek")
 
+    def test_create_comments_in_post_detail(self):
+        """Создавать комментарий неавторизованный пользователь не может"""
+        form_data = {"text": "text"}
+        response = self.guest_client.post(
+            reverse("posts:add_comment", kwargs={"post_id": self.post.pk}),
+            data=form_data,
+            follow=True,
+        )
+        self.assertRedirects(
+            response, f"/auth/login/?next=/posts/{self.post.pk}/comment/"
+        )
+
+    def test_show_new_comments(self):
+        self.authorized_client.post(
+            reverse("posts:add_comment", kwargs={"post_id": self.post.pk}),
+        )
+        response = self.guest_client.get(
+            reverse("posts:post_detail", kwargs={"post_id": self.post.pk})
+        )
+        comment = response.context["comments"][0]
+        self.assertEqual(comment.text, "Комментарий")
+
 
 class PaginatorViewsTest(TestCase):
     @classmethod

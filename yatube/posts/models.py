@@ -2,6 +2,7 @@ from django.db import models
 
 from django.contrib.auth import get_user_model
 
+from core.models import CreateModel
 
 User = get_user_model()
 
@@ -50,7 +51,8 @@ class Comment(models.Model):
                                on_delete=models.CASCADE,
                                related_name='comments',
                                verbose_name='Автор')
-    text = models.TextField(verbose_name='Тело коммента')
+    text = models.TextField(verbose_name='Тело коммента',
+                            help_text='Введите текст')
     created = models.DateTimeField(auto_now_add=True,
                                    verbose_name='Дата создания')
 
