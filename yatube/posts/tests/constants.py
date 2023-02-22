@@ -10,6 +10,8 @@ CREATE_TEMPLATE = 'posts/create.html'
 INDEX_TEMPLATE = 'posts/index.html'
 GROUPS_TEMPLATE = 'posts/group_list.html'
 DETAIL_TEMPLATE = 'posts/post_detail.html'
+TEMPLATE_404 = 'core/404.html'
+TEMPLATE_403 = 'core/403csrf.html'
 
 
 UNEXPECTED_PAGE = '/unexpected_page/'

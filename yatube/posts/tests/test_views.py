@@ -8,7 +8,8 @@ from posts.tests.constants import PROFILE_URL,\
     INDEX_URL, CREATE_URL,\
     GROUPS_URL, DETAIL_URL, EDIT_URL,\
     PROFILE_TEMPLATE, INDEX_TEMPLATE,\
-    CREATE_TEMPLATE, GROUPS_TEMPLATE, DETAIL_TEMPLATE
+    CREATE_TEMPLATE, GROUPS_TEMPLATE, DETAIL_TEMPLATE,\
+    TEMPLATE_404, TEMPLATE_403
 
 from posts.forms import PostForm
 
@@ -187,6 +188,17 @@ class StaticURLTests(TestCase):
         )
         comment = response.context["comments"][0]
         self.assertEqual(comment.text, "Комментарий")
+
+    def test_cache_index_page(self):
+        """Тест кеширования главной страницы"""
+        response = self.authorized_client.get(reverse(INDEX_URL))
+        posts_1 = response.content
+        Post.objects.create(author=self.user, text="Тест кеширования")
+        self.assertTrue(Post.objects.filter(text="Тест кеширования").exists())
+        Post.objects.filter(text="Тест кеширования").delete()
+        response = self.authorized_client.get(reverse(INDEX_URL))
+        posts_2 = response.content
+        self.assertEqual(posts_2, posts_1)
 
 
 class PaginatorViewsTest(TestCase):
