@@ -4,6 +4,7 @@ CREATE_URL = 'posts:create'
 INDEX_URL = 'posts:index'
 GROUPS_URL = 'posts:groups'
 DETAIL_URL = 'posts:post_detail'
+FOLLOW_URL_INDEX = 'posts:follow_index'
 
 PROFILE_TEMPLATE = 'posts/profile.html'
 CREATE_TEMPLATE = 'posts/create.html'

@@ -2,14 +2,15 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
 
-from posts.models import Post, Group, User, Comment
+from posts.models import Post, Group, User, Comment,\
+    Follow
 from posts.utils import POSTS_PER_PAGE
-from posts.tests.constants import PROFILE_URL,\
-    INDEX_URL, CREATE_URL,\
-    GROUPS_URL, DETAIL_URL, EDIT_URL,\
-    PROFILE_TEMPLATE, INDEX_TEMPLATE,\
+from posts.tests.constants import PROFILE_URL, \
+    INDEX_URL, CREATE_URL, \
+    GROUPS_URL, DETAIL_URL, EDIT_URL, \
+    PROFILE_TEMPLATE, INDEX_TEMPLATE, \
     CREATE_TEMPLATE, GROUPS_TEMPLATE, DETAIL_TEMPLATE,\
-    TEMPLATE_404, TEMPLATE_403
+    FOLLOW_URL_INDEX
 
 from posts.forms import PostForm
 
@@ -40,6 +41,8 @@ class StaticURLTests(TestCase):
             author=self.user,
             text='Комментарий'
         )
+        self.new_author = User.objects.create_user(
+            username="new_author")
 
     def test_urls_uses_correct_template(self):
         templates_page_names = {
@@ -104,7 +107,7 @@ class StaticURLTests(TestCase):
     def test_profile_page_show_correct_context(self):
         response = self.authorized_client.get(
             reverse(PROFILE_URL, kwargs={'username': 'Geek'}))
-        test_profile_username = response.context['profile']
+        test_profile_username = response.context['author']
         test_object_post = response.context["page_obj"][0]
         self.assertEqual(test_profile_username, self.post.author)
         self.assertEqual(test_object_post.image, self.post.image)
@@ -199,6 +202,49 @@ class StaticURLTests(TestCase):
         response = self.authorized_client.get(reverse(INDEX_URL))
         posts_2 = response.content
         self.assertEqual(posts_2, posts_1)
+
+    def test_correct_follow_author(self):
+        """Корректная работа подписок"""
+        Post.objects.create(
+            author=self.new_author,
+            text="Новый пост12",
+        )
+        Follow.objects.create(user=self.user, author=self.new_author)
+        response = self.authorized_client.get(reverse(FOLLOW_URL_INDEX))
+        page_object = response.context["page_obj"]
+        first_post = page_object[0]
+        self.assertEqual(first_post.text, "Новый пост12")
+        Follow.objects.get(user=self.user, author=self.new_author).delete()
+        response = self.authorized_client.get(reverse(FOLLOW_URL_INDEX))
+        page_object = response.context["page_obj"]
+        self.assertFalse(page_object)
+
+    def test_correct_follow_users(self):
+        """Появление записи только в подписке пользователя"""
+        new_author_2 = User.objects.create_user(username="new_author_2")
+        new_user = User.objects.create_user(username="new_user")
+        new_user_client = Client()
+        new_user_client.force_login(new_user)
+        Post.objects.create(
+            author=self.new_author,
+            text="Новый пост",
+        )
+        Post.objects.create(author=new_author_2, text="Новый Пост2")
+        obj = [
+            Follow(user=self.user, author=self.new_author),
+            Follow(user=self.user, author=new_author_2),
+            Follow(user=new_user, author=self.new_author),
+        ]
+        Follow.objects.bulk_create(obj)
+        response_first = self.authorized_client.get(
+            reverse(FOLLOW_URL_INDEX)
+        )
+        count_for_first_user = len(response_first.context["page_obj"])
+        response_second = new_user_client.get(
+            reverse(FOLLOW_URL_INDEX)
+        )
+        count_for_second_user = len(response_second.context["page_obj"])
+        self.assertNotEqual(count_for_first_user, count_for_second_user)
 
 
 class PaginatorViewsTest(TestCase):
